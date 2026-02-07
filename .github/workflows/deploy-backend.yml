@@ -53,6 +53,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
+            --add-cloudsql-instances project-0990a5d7-310c-4a56-837:asia-south1:ods-database \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} \
             --set-env-vars REDIS_URL=${{ secrets.REDIS_URL }} \
             --set-env-vars SECRET_KEY=${{ secrets.SECRET_KEY }} \

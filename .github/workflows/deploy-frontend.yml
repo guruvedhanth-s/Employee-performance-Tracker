@@ -11,7 +11,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1  # Change to your preferred region
+  REGION: asia-south1
   SERVICE_NAME: ods-frontend
 
 jobs:

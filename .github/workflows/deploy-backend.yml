@@ -64,7 +64,8 @@ jobs:
             --min-instances 0 \
             --max-instances 20 \
             --timeout 300 \
-            --port 8000
+            --port 8000 \
+            --cpu-boost
 
       - name: Show Service URL
         run: |

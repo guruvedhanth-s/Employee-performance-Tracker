@@ -24,7 +24,7 @@ celery==5.4.0
 flower==2.0.1
 
 # Validation & Serialization
-pydantic==2.10.5
+pydantic>=2.10.5
 
 # File Handling
 openpyxl==3.1.5

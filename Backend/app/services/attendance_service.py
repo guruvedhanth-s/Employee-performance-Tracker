@@ -229,6 +229,17 @@ class AttendanceService:
         employees = []
         summary = {"present": 0, "absent": 0, "leave": 0, "not_marked": 0}
         
+        # Batch query for all marked_by users to avoid N+1
+        marked_by_ids = set()
+        for attendance in attendance_records:
+            if attendance.marked_by:
+                marked_by_ids.add(attendance.marked_by)
+        
+        marked_by_users = {}
+        if marked_by_ids:
+            users = self.db.query(User).filter(User.id.in_(marked_by_ids)).all()
+            marked_by_users = {u.id: u for u in users}
+        
         for membership in memberships:
             user = membership.user
             if not user or not user.is_active:
@@ -240,7 +251,7 @@ class AttendanceService:
                 status = attendance.status
                 attendance_id = attendance.id
                 notes = attendance.notes
-                marked_by_user = self.db.query(User).filter(User.id == attendance.marked_by).first()
+                marked_by_user = marked_by_users.get(attendance.marked_by)
                 marked_by_name = marked_by_user.user_name if marked_by_user else None
                 marked_at = attendance.marked_at
                 summary[status] = summary.get(status, 0) + 1

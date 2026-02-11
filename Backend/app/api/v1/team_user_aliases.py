@@ -54,9 +54,15 @@ async def get_team_aliases(
         TeamUserAlias.is_active == True
     ).all()
     
+    # Batch query all users to avoid N+1
+    user_ids = [alias.user_id for alias in aliases]
+    users = {}
+    if user_ids:
+        users = {u.id: u for u in db.query(User).filter(User.id.in_(user_ids)).all()}
+    
     result = []
     for alias in aliases:
-        user = db.query(User).filter(User.id == alias.user_id).first()
+        user = users.get(alias.user_id)
         result.append({
             "id": alias.id,
             "teamId": alias.team_id,
@@ -88,19 +94,32 @@ async def get_team_alias_options(
         UserTeam.is_active == True
     ).all()
     
+    # Batch query all users to avoid N+1
+    user_ids = [member.user_id for member in team_members]
+    users = {}
+    if user_ids:
+        users = {u.id: u for u in db.query(User).filter(
+            User.id.in_(user_ids),
+            User.is_active == True
+        ).all()}
+    
+    # Batch query all aliases to avoid N+1
+    aliases = {}
+    if user_ids:
+        alias_rows = db.query(TeamUserAlias).filter(
+            TeamUserAlias.team_id == team_id,
+            TeamUserAlias.user_id.in_(user_ids),
+            TeamUserAlias.is_active == True
+        ).all()
+        aliases = {a.user_id: a for a in alias_rows}
+    
     result = []
     for member in team_members:
-        user = db.query(User).filter(User.id == member.user_id).first()
-        if not user or not user.is_active:
+        user = users.get(member.user_id)
+        if not user:
             continue
-            
-        # Get the alias for this user in this team
-        alias = db.query(TeamUserAlias).filter(
-            TeamUserAlias.team_id == team_id,
-            TeamUserAlias.user_id == user.id,
-            TeamUserAlias.is_active == True
-        ).first()
         
+        alias = aliases.get(user.id)
         result.append({
             "userId": user.id,
             "userName": user.user_name,

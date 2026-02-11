@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useDashboardFilterStore } from '../../store/dashboardFilterStore'
 import { useTeamLeadFilterStore } from '../../store/teamLeadFilterStore'
 import { teamsApi, metricsApi, productivityApi, ordersApi } from '../../services/api'
+import { getInitials, handleLogoutFlow } from '../../utils/helpers'
 import type { DashboardStats, TeamProductivity } from '../../types'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -124,18 +125,7 @@ export const TeamLeadDashboard = () => {
   const recentOrders = ordersData?.items || []
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+    handleLogoutFlow(logout, navigate)
   }
 
   const getProductivityColor = (percent: number | null) => {

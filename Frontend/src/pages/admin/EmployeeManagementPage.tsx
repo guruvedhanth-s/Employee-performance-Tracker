@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { usersApi, organizationsApi, teamsApi } from '../../services/api'
+import { getInitials, handleLogoutFlow, parseApiError } from '../../utils/helpers'
 import type { Organization, Team, UserRole } from '../../types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -19,7 +20,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose
 } from '../../components/ui/dialog'
@@ -159,13 +159,6 @@ export const EmployeeManagementPage = () => {
     }
   }
 
-  const getInitials = (userName: string) => {
-    const parts = userName.split(' ')
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-    }
-    return userName.substring(0, 2).toUpperCase()
-  }
 
   const getOrgName = (orgId: number | null) => {
     if (!orgId) return 'No Org'

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { teamsApi } from '../../services/api'
+import { getInitials, handleLogoutFlow } from '../../utils/helpers'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -106,18 +107,7 @@ export const ScoreManagementPage = () => {
   })
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+    handleLogoutFlow(logout, navigate)
   }
 
   const handleSave = () => {

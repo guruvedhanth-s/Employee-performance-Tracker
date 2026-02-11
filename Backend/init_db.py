@@ -32,51 +32,43 @@ def create_test_users():
         
         # Admin user
         admin = User(
-            email="admin@example.com",
+            user_name="admin",
             employee_id="EMP001",
-            first_name="Admin",
-            last_name="User",
-            hashed_password=get_password_hash(passwords["admin"]),
-            role=UserRole.ADMIN,
+            password_hash=get_password_hash(passwords["admin"]),
+            user_role=UserRole.ADMIN,
             is_active=True
         )
         db.add(admin)
-        print(f"[OK] Created admin user: admin@example.com / {passwords['admin']}")
+        print(f"[OK] Created admin user: admin / {passwords['admin']}")
 
         # Team lead user
         teamlead = User(
-            email="teamlead@example.com",
+            user_name="teamlead",
             employee_id="EMP002",
-            first_name="Team",
-            last_name="Lead",
-            hashed_password=get_password_hash(passwords["lead"]),
-            role=UserRole.TEAMLEAD,
-            team_id="team-1",
+            password_hash=get_password_hash(passwords["lead"]),
+            user_role=UserRole.TEAM_LEAD,
             is_active=True
         )
         db.add(teamlead)
-        print(f"[OK] Created team lead user: teamlead@example.com / {passwords['lead']}")
+        print(f"[OK] Created team lead user: teamlead / {passwords['lead']}")
 
         # Employee user
         employee = User(
-            email="employee@example.com",
+            user_name="employee",
             employee_id="EMP003",
-            first_name="Regular",
-            last_name="Employee",
-            hashed_password=get_password_hash(passwords["emp"]),
-            role=UserRole.EMPLOYEE,
-            team_id="team-1",
+            password_hash=get_password_hash(passwords["emp"]),
+            user_role=UserRole.EMPLOYEE,
             is_active=True
         )
         db.add(employee)
-        print(f"[OK] Created employee user: employee@example.com / {passwords['emp']}")
+        print(f"[OK] Created employee user: employee / {passwords['emp']}")
 
         db.commit()
         print("\n[SUCCESS] Test users created successfully!")
         print("\nYou can now login with:")
-        print(f"  Admin:     admin@example.com / {passwords['admin']}")
-        print(f"  Team Lead: teamlead@example.com / {passwords['lead']}")
-        print(f"  Employee:  employee@example.com / {passwords['emp']}")
+        print(f"  Admin:     admin / {passwords['admin']}")
+        print(f"  Team Lead: teamlead / {passwords['lead']}")
+        print(f"  Employee:  employee / {passwords['emp']}")
 
     except Exception as e:
         print(f"\n[ERROR] Error creating test users: {e}")

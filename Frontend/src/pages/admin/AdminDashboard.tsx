@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useAuthStore } from '../../store/authStore'
 import { useDashboardFilterStore, getMonthOptions, getYearOptions } from '../../store/dashboardFilterStore'
 import { metricsApi, authApi, organizationsApi } from '../../services/api'
+import { getInitials, handleLogoutFlow } from '../../utils/helpers'
 import type { PasswordResetRequestItem } from '../../types'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -179,18 +180,7 @@ export const AdminDashboard = () => {
   }, [user, navigate])
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+    handleLogoutFlow(logout, navigate)
   }
 
   return (

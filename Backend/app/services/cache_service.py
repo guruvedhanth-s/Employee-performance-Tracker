@@ -73,7 +73,7 @@ class CacheService:
         try:
             self._redis_client.ping()
             return True
-        except:
+        except Exception:
             return False
     
     def _build_key(self, prefix: str, *args) -> str:

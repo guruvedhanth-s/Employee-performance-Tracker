@@ -8,7 +8,7 @@ import { useDashboardFilterStore, getMonthOptions, getYearOptions } from '../../
 import { useTeamLeadFilterStore } from '../../store/teamLeadFilterStore'
 import { teamsApi, productivityApi, weeklyTargetsApi } from '../../services/api'
 import type { TeamProductivity, EmployeeProductivity } from '../../types'
-import { Button } from '../../components/ui/button'
+import { getInitials, handleLogoutFlow } from '../../utils/helpers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Avatar, AvatarFallback } from '../../components/ui/avatar'
@@ -244,8 +244,7 @@ export const TeamProductivityPage = () => {
   }
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    handleLogoutFlow(logout, navigate)
   }
 
   const handlePeriodChange = (value: string) => {
@@ -262,16 +261,6 @@ export const TeamProductivityPage = () => {
       setFilterPeriod('custom')
       setUseCustomRange(false)
     }
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
   }
 
   const getProductivityColor = (percent: number | null) => {

@@ -1,0 +1,127 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  BACKEND_SERVICE_NAME: employee-performance-backend
+  FRONTEND_SERVICE_NAME: employee-performance-frontend
+  REPO_NAME: employee-performance-tracker
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Google Auth
+      id: auth
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Setup Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker to use gcloud as a credential helper
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build and push Backend Docker image
+      run: |
+        cd Backend
+        docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$BACKEND_SERVICE_NAME:$GITHUB_SHA .
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$BACKEND_SERVICE_NAME:$GITHUB_SHA
+
+    - name: Deploy Backend to Cloud Run
+      run: |
+        gcloud run deploy $BACKEND_SERVICE_NAME \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$BACKEND_SERVICE_NAME:$GITHUB_SHA \
+          --region=$REGION \
+          --platform=managed \
+          --allow-unauthenticated \
+          --memory=1Gi \
+          --cpu=1 \
+          --timeout=300 \
+          --set-env-vars="DATABASE_URL=${{ secrets.DATABASE_URL }},REDIS_URL=${{ secrets.REDIS_URL }}" \
+          --max-instances=10
+
+    - name: Get Backend URL
+      id: backend-url
+      run: |
+        BACKEND_URL=$(gcloud run services describe $BACKEND_SERVICE_NAME --region=$REGION --format='value(status.url)')
+        echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Google Auth
+      id: auth
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Setup Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker to use gcloud as a credential helper
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Get Backend URL
+      id: backend-url
+      run: |
+        BACKEND_URL=$(gcloud run services describe $BACKEND_SERVICE_NAME --region=$REGION --format='value(status.url)')
+        echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
+
+    - name: Build and push Frontend Docker image
+      run: |
+        cd Frontend
+        docker build \
+          --build-arg VITE_API_URL="${{ steps.backend-url.outputs.backend_url }}" \
+          -t us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$FRONTEND_SERVICE_NAME:$GITHUB_SHA .
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$FRONTEND_SERVICE_NAME:$GITHUB_SHA
+
+    - name: Deploy Frontend to Cloud Run
+      run: |
+        gcloud run deploy $FRONTEND_SERVICE_NAME \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$FRONTEND_SERVICE_NAME:$GITHUB_SHA \
+          --region=$REGION \
+          --platform=managed \
+          --allow-unauthenticated \
+          --memory=512Mi \
+          --cpu=1 \
+          --timeout=60 \
+          --max-instances=10
+
+    - name: Get Frontend URL
+      id: frontend-url
+      run: |
+        FRONTEND_URL=$(gcloud run services describe $FRONTEND_SERVICE_NAME --region=$REGION --format='value(status.url)')
+        echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
+
+    - name: Output URLs
+      run: |
+        echo "Backend URL: ${{ steps.backend-url.outputs.backend_url }}"
+        echo "Frontend URL: ${{ steps.frontend-url.outputs.frontend_url }}"

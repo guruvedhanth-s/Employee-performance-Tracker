@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { teamsApi, usersApi, organizationsApi, faNamesApi } from '../../services/api'
+import { getInitials, handleLogoutFlow, parseApiError } from '../../utils/helpers'
 import type { Team, TeamWithMembers, User, Organization, TeamCreate, TeamUpdate, FAName } from '../../types'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -19,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '../../components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 import { 
@@ -55,21 +55,7 @@ const AVAILABLE_PRODUCTS = [
   'Commercial', 'Construction', 'Foreclosure', 'REO', 'Short Sale'
 ]
 
-// Helper function to parse API error responses
-const parseApiError = (error: any, defaultMsg: string = 'An error occurred'): string => {
-  const detail = error.response?.data?.detail
-  if (!detail) return defaultMsg
-  
-  if (typeof detail === 'string') {
-    return detail
-  } else if (Array.isArray(detail)) {
-    // Handle Pydantic validation errors (422)
-    return detail.map((err: any) => err.msg || err.message || JSON.stringify(err)).join(', ')
-  } else if (typeof detail === 'object') {
-    return detail.msg || detail.message || JSON.stringify(detail)
-  }
-  return defaultMsg
-}
+
 
 export const TeamManagementPage = () => {
   const { user } = useAuthStore()

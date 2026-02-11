@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useAuthStore } from '../../store/authStore'
 import { useTeamLeadFilterStore } from '../../store/teamLeadFilterStore'
 import { teamsApi, usersApi } from '../../services/api'
+import { getInitials, handleLogoutFlow, parseApiError } from '../../utils/helpers'
 import type { TeamMember, TeamWithMembers, User } from '../../types'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -105,19 +106,10 @@ export const TeamMembersPage = () => {
   const currentTeam = myTeams.find(t => t.id === teamId)
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    handleLogoutFlow(logout, navigate)
   }
 
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
+
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -379,16 +371,6 @@ const TeamMembersContent = ({ teamId }: { teamId: number }) => {
       teamId,
       userId: memberToRemove.userId,
     })
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
   }
 
   const getRoleBadgeVariant = (role: string) => {

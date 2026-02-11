@@ -65,22 +65,10 @@ def serialize_reference_type(ref_obj) -> Optional[dict]:
     }
 
 
-def get_effective_process_type_name(order: Order) -> str:
-    """
-    Get the process type name for display.
-    
-    Simply returns the original process type name (Step1, Step2, or Single Seat).
-    The employee can see which steps they completed from the step details.
-    """
-    if order.process_type:
-        return order.process_type.name
-    return "Unknown"
-
-
 def serialize_order(order: Order, include_steps: bool = True) -> dict:
     """Serialize order to camelCase dict"""
-    # Get the effective process type name based on actual step completion
-    effective_process_type_name = get_effective_process_type_name(order)
+    # Get the process type name for display
+    effective_process_type_name = order.process_type.name if order.process_type else "Unknown"
     
     # Create a modified process type object for display
     process_type_display = None
@@ -125,8 +113,8 @@ def serialize_order(order: Order, include_steps: bool = True) -> dict:
 
 def serialize_simple_order(order: Order) -> dict:
     """Serialize order to simplified camelCase dict for lists"""
-    # Get the effective process type name based on actual step completion
-    effective_process_type_name = get_effective_process_type_name(order)
+    # Get the process type name for display
+    effective_process_type_name = order.process_type.name if order.process_type else "Unknown"
     
     return {
         "id": order.id,

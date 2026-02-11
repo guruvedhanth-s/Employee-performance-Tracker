@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { useTeamLeadFilterStore } from '../../store/teamLeadFilterStore'
 import { teamsApi, ordersApi, referenceApi } from '../../services/api'
+import { getInitials, handleLogoutFlow } from '../../utils/helpers'
 import type { OrderSimple, ProcessType, Division, OrderStatus } from '../../types'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -163,18 +164,7 @@ export const TeamOrdersPage = () => {
   const pendingBilling = orders.filter(o => o.billingStatus === 'pending').length
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
-
-  const getInitials = (name: string) => {
-    if (!name) return '??'
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+    handleLogoutFlow(logout, navigate)
   }
 
   const getOrderStatusBadge = (order: OrderSimple) => {
